@@ -1,0 +1,14 @@
+Mods: {
+	JediForceMod: {
+		Buffs: {
+			ForceProtectionBuff: {
+				DisplayName: Защита Силы
+				Description: Поглощает урон за счет маны
+			}
+			ForceProtectionCooldown: {
+				DisplayName: Перезарядка Силы
+				Description: Защита Силы восстанавливается
+			}
+		}
+	}
+}

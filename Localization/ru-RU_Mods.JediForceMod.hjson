@@ -1,0 +1,181 @@
+Items: {
+	ForcePush: {
+		// DisplayName: Force Push
+		// Tooltip: ""
+	}
+
+	ForceSpeed: {
+		// DisplayName: Force Speed
+		// Tooltip: ""
+	}
+
+	ForceSight: {
+		// DisplayName: Force Sight
+		// Tooltip: ""
+	}
+
+	ForceHealth: {
+		// DisplayName: Force Health
+		// Tooltip: ""
+	}
+
+	ForceLightning: {
+		// DisplayName: Force Lightning
+		// Tooltip: ""
+	}
+
+	ForceChoke: {
+		// DisplayName: Force Choke
+		// Tooltip: ""
+	}
+
+	ForceMindTrick: {
+		// DisplayName: Force Mind Trick
+		// Tooltip: ""
+	}
+
+	ForceProtection: {
+		// DisplayName: Force Protection
+		// Tooltip: ""
+	}
+
+	ForceSaberThrow: {
+		// DisplayName: Force Saber Throw
+		// Tooltip: ""
+	}
+}
+
+Configs: {
+	ForceConfig: {
+		// DisplayName: Force Config
+
+		Headers: {
+			// Force_Push_Settings: Force_ Push_ Settings Header
+			// ForceSpeedSettings: Force Speed Settings Header
+			// ForceHealSettings: Force Heal Settings Header
+			// ForceLightningSettings: Force Lightning Settings Header
+			// ForceJumpSettings: Force Jump Settings Header
+			// ForceChokeSettings: Force Choke Settings Header
+			// ForceMindTrickSettings: Force Mind Trick Settings Header
+			// ForceProtectionSettings: Force Protection Settings Header
+			// ForceSaberThrowSettings: Force Saber Throw Settings Header
+		}
+
+		PushRange: {
+			// Label: Дальность толчка (Range)
+			// Tooltip: Радиус действия Силового Толчка в пикселях
+		}
+
+		PushKnockback: {
+			// Label: Сила импульса (Knockback)
+			// Tooltip: ""
+		}
+
+		PushManaCost: {
+			// Label: Затраты маны
+			// Tooltip: ""
+		}
+
+		SpeedMultiplier: {
+			// Label: Множитель скорости
+			// Tooltip: ""
+		}
+
+		SpeedDuration: {
+			// Label: Длительность (в тиках)
+			// Tooltip: ""
+		}
+
+		HealManaCost: {
+			// Label: Затраты маны на лечение
+			// Tooltip: ""
+		}
+
+		HealAmount: {
+			// Label: Базовое лечение (HP)
+			// Tooltip: ""
+		}
+
+		LightningManaCost: {
+			// Label: Затраты маны на молнию
+			// Tooltip: ""
+		}
+
+		LightningDamage: {
+			// Label: Базовый урон молнии
+			// Tooltip: ""
+		}
+
+		JumpStrength: {
+			// Label: Сила прыжка за уровень
+			// Tooltip: ""
+		}
+
+		ChokeManaCost: {
+			// Label: Затраты маны на удушение (за тик)
+			// Tooltip: ""
+		}
+
+		ChokeDamage: {
+			// Label: Урон удушения (базовый)
+			// Tooltip: ""
+		}
+
+		MindTrickManaCost: {
+			// Label: Затраты маны на Обман Разума
+			// Tooltip: ""
+		}
+
+		MindTrickDuration: {
+			// Label: Длительность (в тиках)
+			// Tooltip: ""
+		}
+
+		ProtectionBaseCap: {
+			// Label: Базовый лимит блока (Ур 1)
+			// Tooltip: ""
+		}
+
+		SaberThrowManaCost: {
+			// Label: Затраты маны на Бросок Меча
+			// Tooltip: ""
+		}
+
+		SaberThrowDamage: {
+			// Label: Базовый урон Броска Меча
+			// Tooltip: ""
+		}
+	}
+}
+
+Buffs: {
+	ForceSpeedBuff: {
+		// DisplayName: Force Speed Buff
+		// Description: Mods.JediForceMod.Buffs.ForceSpeedBuff.Description
+	}
+
+	ForceProtectionBuff: {
+		DisplayName: Защита Силы
+		Description: Поглощает урон за счет маны
+	}
+
+	ForceProtectionCooldown: {
+		DisplayName: Перезарядка Силы
+		Description: Защита Силы восстанавливается
+	}
+}
+
+Keybinds: {
+	// "Open Force Menu.DisplayName": Open  Force  Menu
+	// "Force Push.DisplayName": Force  Push
+	// "Force Speed.DisplayName": Force  Speed
+	// "Force Heal.DisplayName": Force  Heal
+	// "Force Lightning.DisplayName": Force  Lightning
+	// "Force Mind Trick.DisplayName": Force  Mind  Trick
+	// "Force Protection.DisplayName": Force  Protection
+	// "Force Sight.DisplayName": Force  Sight
+	// "Force Choke.DisplayName": Force  Choke
+	// "Force Saber Throw.DisplayName": Force  Saber  Throw
+}
+
+// Projectiles.SaberThrowProjectile.DisplayName: Saber Throw Projectile

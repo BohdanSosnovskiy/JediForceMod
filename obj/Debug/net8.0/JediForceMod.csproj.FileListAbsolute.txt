@@ -1,0 +1,12 @@
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\bin\Debug\net8.0\JediForceMod.deps.json
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\bin\Debug\net8.0\JediForceMod.dll
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\bin\Debug\net8.0\JediForceMod.pdb
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.csproj.AssemblyReference.cache
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.AssemblyInfoInputs.cache
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.AssemblyInfo.cs
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.csproj.CoreCompileInputs.cache
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.dll
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\refint\JediForceMod.dll
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.pdb
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\ref\JediForceMod.dll

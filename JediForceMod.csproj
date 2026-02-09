@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- Import tModLoader mod properties -->
+	<Import Project="..\tModLoader.targets" />
+
+	<!-- General -->
+	<PropertyGroup>
+		
+	</PropertyGroup>
+	<ItemGroup>
+	  <AdditionalFiles Remove="Assets\UI\BarFill.png" />
+	  <AdditionalFiles Remove="Assets\UI\Choke.png" />
+	  <AdditionalFiles Remove="Assets\UI\Frame.png" />
+	  <AdditionalFiles Remove="Assets\UI\Frame_use.png" />
+	  <AdditionalFiles Remove="Assets\UI\Heal.png" />
+	  <AdditionalFiles Remove="Assets\UI\Jump.png" />
+	  <AdditionalFiles Remove="Assets\UI\Lightning.png" />
+	  <AdditionalFiles Remove="Assets\UI\MindTrick.png" />
+	  <AdditionalFiles Remove="Assets\UI\Protection.png" />
+	  <AdditionalFiles Remove="Assets\UI\Push.png" />
+	  <AdditionalFiles Remove="Assets\UI\Sight.png" />
+	  <AdditionalFiles Remove="Assets\UI\Speed.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Assets\UI\BarFill.png" />
+	  <Content Include="Assets\UI\Choke.png" />
+	  <Content Include="Assets\UI\Frame.png" />
+	  <Content Include="Assets\UI\Frame_use.png" />
+	  <Content Include="Assets\UI\Heal.png" />
+	  <Content Include="Assets\UI\Jump.png" />
+	  <Content Include="Assets\UI\Lightning.png" />
+	  <Content Include="Assets\UI\MindTrick.png" />
+	  <Content Include="Assets\UI\Protection.png" />
+	  <Content Include="Assets\UI\Push.png" />
+	  <Content Include="Assets\UI\Sight.png" />
+	  <Content Include="Assets\UI\Speed.png" />
+	</ItemGroup>
+
+	<!-- References -->
+
+</Project>
