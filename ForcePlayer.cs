@@ -735,8 +735,21 @@ namespace JediForceMod
                                 Dust.NewDustPerfect(proj.Center, DustID.Electric, speed, 0, default, 1.0f).noGravity = true;
                             }
 
-                            // Уничтожаем снаряд
-                            proj.Kill();
+                            // 25% шанс отразить снаряд обратно
+                            if (Main.rand.NextBool(4))
+                            {
+                                proj.velocity = -proj.velocity; // Разворачиваем вектор
+                                proj.hostile = false;
+                                proj.friendly = true;
+                                proj.owner = Player.whoAmI; // Снаряд теперь принадлежит игроку
+                                proj.damage *= 2; // Удваиваем урон
+                                proj.netUpdate = true;
+                            }
+                            else
+                            {
+                                // Уничтожаем снаряд
+                                proj.Kill();
+                            }
                         }
                     }
                 }
