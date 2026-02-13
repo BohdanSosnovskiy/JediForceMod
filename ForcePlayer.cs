@@ -1233,124 +1233,140 @@ namespace JediForceMod
                 finalDamage *= 2; // Удвоенный урон
             }
 
-            List<int> hitTargets = new List<int>();
-            Vector2 currentSourcePos = Player.Center;
-            int firstTarget = -1;
-            float distToMouse = 200f;
-
-            // Поиск первой цели у курсора
-            for (int k = 0; k < Main.maxNPCs; k++)
+            // ЛЕГЕНДАРНЫЙ ЭФФЕКТ: 30% шанс выпустить сразу 3 молнии разных цветов
+            int casts = 1;
+            if (SkillLevels[4] >= 15 && Main.rand.NextFloat() < 0.30f)
             {
-                NPC npc = Main.npc[k];
-                if (npc.active && !npc.friendly && !npc.dontTakeDamage)
-                {
-                    float d = Vector2.Distance(Player.Center + direction, npc.Center); // direction здесь это смещение от игрока к курсору
-                    // Или используем Main.MouseWorld, если direction это вектор
-                    // Для универсальности используем Main.MouseWorld, так как direction передается как (Mouse - Player)
-                    float dMouse = Vector2.Distance(Main.MouseWorld, npc.Center);
-
-                    if (dMouse < distToMouse && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
-                    {
-                        distToMouse = dMouse;
-                        firstTarget = k;
-                    }
-                }
+                casts = 3;
             }
 
-            // Если у курсора нет, ищем ближайшего
-            if (firstTarget == -1)
+            // Звук воспроизводим один раз
+            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item122, Player.Center);
+
+            for (int cast = 0; cast < casts; cast++)
             {
-                float minDist = chainRange;
+                // Если кастов 3, то используем визуальные стили 1, 2 и 3 по очереди. Иначе - текущий уровень.
+                int visualLevel = (casts > 1) ? (cast + 1) : LightningLevel;
+
+                List<int> hitTargets = new List<int>();
+                Vector2 currentSourcePos = Player.Center;
+                int firstTarget = -1;
+                float distToMouse = 200f;
+
+                // Поиск первой цели у курсора
                 for (int k = 0; k < Main.maxNPCs; k++)
                 {
                     NPC npc = Main.npc[k];
                     if (npc.active && !npc.friendly && !npc.dontTakeDamage)
                     {
-                        float d = Vector2.Distance(Player.Center, npc.Center);
-                        if (d < minDist && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
+                        // direction здесь это смещение от игрока к курсору
+                        float dMouse = Vector2.Distance(Main.MouseWorld, npc.Center);
+
+                        if (dMouse < distToMouse && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
                         {
-                            minDist = d;
+                            distToMouse = dMouse;
                             firstTarget = k;
                         }
                     }
                 }
-            }
 
-            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item122, Player.Center);
-
-            if (firstTarget != -1)
-            {
-                int currentTarget = firstTarget;
-                for (int i = 0; i < maxTargets; i++)
+                // Если у курсора нет, ищем ближайшего
+                if (firstTarget == -1)
                 {
-                    if (currentTarget == -1) break;
-                    NPC npc = Main.npc[currentTarget];
-                    hitTargets.Add(currentTarget);
-
-                    int hitDmg = (int)(finalDamage * (1f - i * 0.1f));
-                    if (hitDmg < 1) hitDmg = 1;
-
-                    npc.StrikeNPC(npc.CalculateHitInfo(hitDmg, 0, false, 0));
-                    AddExperience(hitDmg);
-
-                    AddSkillXP(4, 1); // 4 - индекс Молнии. Снизили с 2 до 1 за удар.
-                    if (npc.life <= 0) AddExperience(30); // Бонус за убийство молнией
-
-                    if (LightningLevel >= 3) npc.AddBuff(Terraria.ID.BuffID.Electrified, 180);
-
-                    // Визуальный эффект молнии
-                    DrawLightning(currentSourcePos, npc.Center, LightningLevel);
-
-                    currentSourcePos = npc.Center;
-                    int nextTarget = -1;
-                    float minNextDist = chainRange;
-
+                    float minDist = chainRange;
                     for (int k = 0; k < Main.maxNPCs; k++)
                     {
-                        NPC n = Main.npc[k];
-                        if (n.active && !n.friendly && !n.dontTakeDamage && !hitTargets.Contains(k))
+                        NPC npc = Main.npc[k];
+                        if (npc.active && !npc.friendly && !npc.dontTakeDamage)
                         {
-                            float d = Vector2.Distance(currentSourcePos, n.Center);
-                            if (d < minNextDist && Collision.CanHitLine(currentSourcePos, 0, 0, n.Center, 0, 0))
+                            float d = Vector2.Distance(Player.Center, npc.Center);
+                            if (d < minDist && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
                             {
-                                minNextDist = d;
-                                nextTarget = k;
+                                minDist = d;
+                                firstTarget = k;
                             }
                         }
                     }
-                    currentTarget = nextTarget;
                 }
-            }
-            else
-            {
-                // В пустоту
-                Vector2 dir = direction;
-                dir.Normalize();
-                
-                Vector2 endPos = Player.Center + dir * chainRange;
-                
-                // Проверяем столкновение с блоками (Raycast), чтобы молния не проходила сквозь стены
-                for (float f = 10f; f < chainRange; f += 10f)
+
+                if (firstTarget != -1)
                 {
-                    Vector2 checkPos = Player.Center + dir * f;
-                    if (WorldGen.SolidTile(checkPos.ToTileCoordinates()))
+                    int currentTarget = firstTarget;
+                    for (int i = 0; i < maxTargets; i++)
                     {
-                        endPos = checkPos;
-                        break;
+                        if (currentTarget == -1) break;
+                        NPC npc = Main.npc[currentTarget];
+                        hitTargets.Add(currentTarget);
+
+                        int hitDmg = (int)(finalDamage * (1f - i * 0.1f));
+                        if (hitDmg < 1) hitDmg = 1;
+
+                        // Сбрасываем иммунитет, чтобы все 3 молнии могли нанести урон одной цели
+                        if (casts > 1) npc.immune[Player.whoAmI] = 0;
+
+                        npc.StrikeNPC(npc.CalculateHitInfo(hitDmg, 0, false, 0));
+                        AddExperience(hitDmg);
+
+                        AddSkillXP(4, 1); // 4 - индекс Молнии. Снизили с 2 до 1 за удар.
+                        if (npc.life <= 0) AddExperience(30); // Бонус за убийство молнией
+
+                        if (LightningLevel >= 3) npc.AddBuff(Terraria.ID.BuffID.Electrified, 180);
+
+                        // Визуальный эффект молнии (используем visualLevel для цвета)
+                        DrawLightning(currentSourcePos, npc.Center, visualLevel);
+
+                        currentSourcePos = npc.Center;
+                        int nextTarget = -1;
+                        float minNextDist = chainRange;
+
+                        for (int k = 0; k < Main.maxNPCs; k++)
+                        {
+                            NPC n = Main.npc[k];
+                            if (n.active && !n.friendly && !n.dontTakeDamage && !hitTargets.Contains(k))
+                            {
+                                float d = Vector2.Distance(currentSourcePos, n.Center);
+                                if (d < minNextDist && Collision.CanHitLine(currentSourcePos, 0, 0, n.Center, 0, 0))
+                                {
+                                    minNextDist = d;
+                                    nextTarget = k;
+                                }
+                            }
+                        }
+                        currentTarget = nextTarget;
                     }
                 }
-                
-                // Рисуем молнию в точку попадания (с небольшим разбросом для хаотичности)
-                endPos += Main.rand.NextVector2Circular(20f, 20f);
-                DrawLightning(currentSourcePos, endPos, LightningLevel);
-                
-                // Искры в месте удара
+                else
+                {
+                    // В пустоту
+                    Vector2 dir = direction;
+                    // Немного меняем направление для красоты, если кастов несколько
+                    if (casts > 1) dir = dir.RotatedByRandom(0.1f);
+                    dir.Normalize();
 
-                int impactDust = Terraria.ID.DustID.Electric;
-                if (LightningLevel == 2) impactDust = Terraria.ID.DustID.ShadowbeamStaff;
-                else if (LightningLevel >= 3) impactDust = Terraria.ID.DustID.LifeDrain;
+                    Vector2 endPos = Player.Center + dir * chainRange;
 
-                Dust.NewDust(endPos, 10, 10, impactDust);
+                    // Проверяем столкновение с блоками (Raycast), чтобы молния не проходила сквозь стены
+                    for (float f = 10f; f < chainRange; f += 10f)
+                    {
+                        Vector2 checkPos = Player.Center + dir * f;
+                        if (WorldGen.SolidTile(checkPos.ToTileCoordinates()))
+                        {
+                            endPos = checkPos;
+                            break;
+                        }
+                    }
+
+                    // Рисуем молнию в точку попадания (с небольшим разбросом для хаотичности)
+                    endPos += Main.rand.NextVector2Circular(20f, 20f);
+                    DrawLightning(currentSourcePos, endPos, visualLevel);
+
+                    // Искры в месте удара
+                    int impactDust = Terraria.ID.DustID.Electric;
+                    if (visualLevel == 2) impactDust = Terraria.ID.DustID.ShadowbeamStaff;
+                    else if (visualLevel >= 3) impactDust = Terraria.ID.DustID.LifeDrain;
+
+                    Dust.NewDust(endPos, 10, 10, impactDust);
+                }
             }
         }
 
@@ -1522,6 +1538,7 @@ namespace JediForceMod
             if (SkillLevels[6] >= 15)
             {
                 maxTargets += (SkillLevels[6] - 14);
+                damage *= 2; // Удвоенный урон
             }
 
             // 1. Очистка списка от невалидных целей (мертвые, далеко, неактивные)
@@ -1571,114 +1588,118 @@ namespace JediForceMod
                 }
             }
 
+            // Списываем ману один раз за тик, независимо от количества целей
+            if (ChokeTargets.Count > 0)
+            {
+                if (Player.statMana >= manaCost)
+                {
+                    Player.statMana -= manaCost;
+                    Player.manaRegenDelay = 60;
+                }
+                else
+                {
+                    ChokeTargets.Clear(); // Если маны нет, отпускаем всех
+                    return;
+                }
+            }
+
             // 3. Применение эффекта ко всем целям
             for (int i = ChokeTargets.Count - 1; i >= 0; i--)
             {
                 int targetIndex = ChokeTargets[i];
                 NPC target = Main.npc[targetIndex];
 
-                if (Player.statMana >= manaCost)
+                target.GetGlobalNPC<ForceGlobalNPC>().forceChokeTimer = 5;
+
+                if (Main.GameUpdateCount % 10 == 0)
                 {
-                    Player.statMana -= manaCost;
-                    Player.manaRegenDelay = 60;
-
-                    target.GetGlobalNPC<ForceGlobalNPC>().forceChokeTimer = 5;
-
-                    if (Main.GameUpdateCount % 10 == 0)
+                    target.StrikeNPC(target.CalculateHitInfo(damage, 0, false, 0));
+                    AddExperience(damage);
+                    AddSkillXP(6, 1); // 6 - индекс Удушения. Опыт за тик урона.
+                    if (target.life <= 0) 
                     {
-                        target.StrikeNPC(target.CalculateHitInfo(damage, 0, false, 0));
-                        AddExperience(damage);
-                        AddSkillXP(6, 1); // 6 - индекс Удушения. Опыт за тик урона.
-                        if (target.life <= 0) 
+                        AddExperience(30); // Бонус за убийство удушением
+
+                        // --- ЭФФЕКТ ПОГЛОЩЕНИЯ (Мастерство 9+) ---
+                        if (SkillLevels[6] >= 9)
                         {
-                            AddExperience(30); // Бонус за убийство удушением
+                            int manaRestore = 15;
+                            int healthRestore = 5;
+                            Player.statMana += manaRestore;
+                            Player.ManaEffect(manaRestore);
+                            Player.statLife += healthRestore;
+                            Player.HealEffect(healthRestore);
 
-                            // --- ЭФФЕКТ ПОГЛОЩЕНИЯ (Мастерство 9+) ---
-                            if (SkillLevels[6] >= 9)
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center); // Звук поглощения
+                            for (int h = 0; h < 20; h++)
                             {
-                                int manaRestore = 15;
-                                int healthRestore = 5;
-                                Player.statMana += manaRestore;
-                                Player.ManaEffect(manaRestore);
-                                Player.statLife += healthRestore;
-                                Player.HealEffect(healthRestore);
-
-                                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center); // Звук поглощения
-                                for (int h = 0; h < 20; h++)
-                                {
-                                    Vector2 velocity = Player.Center - target.Center;
-                                    velocity.Normalize();
-                                    velocity *= Main.rand.NextFloat(5f, 10f); // Частицы летят к игроку
-                                    Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 1.5f).noGravity = true;
-                                }
-                            }
-                        }
-
-                        if (Main.GameUpdateCount % 30 == 0) Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item15, target.Center);
-                        if (ChokeLevel >= 3) target.AddBuff(Terraria.ID.BuffID.Suffocation, 120);
-                    }
-
-                    // ЛЕГЕНДАРНЫЙ ЭФФЕКТ (Ур 15+): Казнь
-                    if (SkillLevels[6] >= 15 && !target.boss)
-                    {
-                        if (target.life < target.lifeMax * 0.2f) // Если меньше 20% HP
-                        {
-                            target.StrikeNPC(target.CalculateHitInfo(target.life + 999, 0, true)); // Мгновенная смерть (крит)
-                            CombatText.NewText(target.getRect(), Color.Red, "EXECUTED!", true);
-                            AddExperience(50); // Бонус за казнь
-
-                            // Эффект поглощения при казни
-                            if (SkillLevels[6] >= 9)
-                            {
-                                int manaRestore = 30; // Удвоенная награда за казнь
-                                int healthRestore = 10;
-                                Player.statMana += manaRestore;
-                                Player.ManaEffect(manaRestore);
-                                Player.statLife += healthRestore;
-                                Player.HealEffect(healthRestore);
-
-                                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center);
-                                for (int h = 0; h < 30; h++)
-                                {
-                                    Vector2 velocity = Player.Center - target.Center;
-                                    velocity.Normalize();
-                                    velocity *= Main.rand.NextFloat(8f, 15f);
-                                    Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 2.0f).noGravity = true;
-                                }
+                                Vector2 velocity = Player.Center - target.Center;
+                                velocity.Normalize();
+                                velocity *= Main.rand.NextFloat(5f, 10f); // Частицы летят к игроку
+                                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 1.5f).noGravity = true;
                             }
                         }
                     }
 
-                    // Визуальная линия связи между игроком и целью
-                    Vector2 connectionDir = target.Center - Player.Center;
-                    float connectionDist = connectionDir.Length();
-                    connectionDir.Normalize();
+                    if (Main.GameUpdateCount % 30 == 0) Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item15, target.Center);
+                    if (ChokeLevel >= 3) target.AddBuff(Terraria.ID.BuffID.Suffocation, 120);
+                }
 
-                    for (float k = 10; k < connectionDist; k += 10f)
+                // ЛЕГЕНДАРНЫЙ ЭФФЕКТ (Ур 15+): Казнь
+                if (SkillLevels[6] >= 15 && !target.boss)
+                {
+                    if (target.life < target.lifeMax * 0.2f) // Если меньше 20% HP
                     {
-                        if (Main.rand.NextBool(3)) // Мерцающий эффект
+                        target.StrikeNPC(target.CalculateHitInfo(target.life + 999, 0, true)); // Мгновенная смерть (крит)
+                        CombatText.NewText(target.getRect(), Color.Red, "EXECUTED!", true);
+                        AddExperience(50); // Бонус за казнь
+
+                        // Эффект поглощения при казни
+                        if (SkillLevels[6] >= 9)
                         {
-                            Vector2 pos = Player.Center + connectionDir * k;
-                            Dust d = Dust.NewDustPerfect(pos, Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 0.6f);
-                            d.noGravity = true;
-                            d.velocity = connectionDir * 5f; // Частицы быстро летят к цели
-                        }
-                    }
-                    Dust chokeDust = Dust.NewDustDirect(target.Top + new Vector2(-10, 0), 20, 20, Terraria.ID.DustID.RedTorch, 0, 0, 100, default, 1.2f);
-                    chokeDust.noGravity = true;
-                    chokeDust.velocity *= 0.5f;
+                            int manaRestore = 30; // Удвоенная награда за казнь
+                            int healthRestore = 10;
+                            Player.statMana += manaRestore;
+                            Player.ManaEffect(manaRestore);
+                            Player.statLife += healthRestore;
+                            Player.HealEffect(healthRestore);
 
-                    for (int h = 0; h < 3; h++)
-                    {
-                        Dust d = Dust.NewDustPerfect(target.Center + Main.rand.NextVector2Circular(target.width * 0.5f, target.height * 0.5f), Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 2.0f);
-                        d.noGravity = true;
-                        d.velocity *= 0.1f;
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center);
+                            for (int h = 0; h < 30; h++)
+                            {
+                                Vector2 velocity = Player.Center - target.Center;
+                                velocity.Normalize();
+                                velocity *= Main.rand.NextFloat(8f, 15f);
+                                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 2.0f).noGravity = true;
+                            }
+                        }
                     }
                 }
-                else
+
+                // Визуальная линия связи между игроком и целью
+                Vector2 connectionDir = target.Center - Player.Center;
+                float connectionDist = connectionDir.Length();
+                connectionDir.Normalize();
+
+                for (float k = 10; k < connectionDist; k += 10f)
                 {
-                    // Если мана кончилась, перестаем душить эту цель
-                    ChokeTargets.RemoveAt(i);
+                    if (Main.rand.NextBool(3)) // Мерцающий эффект
+                    {
+                        Vector2 pos = Player.Center + connectionDir * k;
+                        Dust d = Dust.NewDustPerfect(pos, Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 0.6f);
+                        d.noGravity = true;
+                        d.velocity = connectionDir * 5f; // Частицы быстро летят к цели
+                    }
+                }
+                Dust chokeDust = Dust.NewDustDirect(target.Top + new Vector2(-10, 0), 20, 20, Terraria.ID.DustID.RedTorch, 0, 0, 100, default, 1.2f);
+                chokeDust.noGravity = true;
+                chokeDust.velocity *= 0.5f;
+
+                for (int h = 0; h < 3; h++)
+                {
+                    Dust d = Dust.NewDustPerfect(target.Center + Main.rand.NextVector2Circular(target.width * 0.5f, target.height * 0.5f), Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 2.0f);
+                    d.noGravity = true;
+                    d.velocity *= 0.1f;
                 }
             }
         }
