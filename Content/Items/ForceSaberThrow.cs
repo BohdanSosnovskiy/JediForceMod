@@ -8,8 +8,7 @@ namespace JediForceMod.Content.Items
 {
     public class ForceSaberThrow : ModItem
     {
-        // Используем текстуру красного лазерного меча из ваниллы
-        public override string Texture => "Terraria/Images/Item_" + ItemID.RedPhasesaber;
+        public override string Texture => "JediForceMod/Assets/UI/ForceSaberthrow";
 
         public override void SetDefaults()
         {

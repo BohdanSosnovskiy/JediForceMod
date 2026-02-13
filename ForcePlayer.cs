@@ -25,7 +25,7 @@ namespace JediForceMod
         public int ProtectionLevel = 0;
         public int SaberThrowLevel = 0;
         private bool _wasProtectionActive = false; // Для отслеживания момента окончания баффа
-        public int ChokeTargetIndex = -1; // Индекс NPC, которого мы душим
+        public List<int> ChokeTargets = new List<int>(); // Список NPC, которых мы душим
         private bool _sightActive = false;
         public bool HealActive = false; // Активно ли сейчас лечение
         public int HealTimer = 0;       // Таймер длительности текущего сеанса лечения
@@ -374,6 +374,7 @@ namespace JediForceMod
                         {
                             int retributionDamage = damageTaken * 2; // 200% от полученного урона
                             npc.StrikeNPC(npc.CalculateHitInfo(retributionDamage, 0));
+                            if (npc.life <= 0) AddExperience(30); // Бонус за убийство возмездием
                             Dust.NewDust(npc.position, npc.width, npc.height, Terraria.ID.DustID.GreenFairy, 0, 0, 100, default, 2f);
                         }
                     }
@@ -508,6 +509,7 @@ namespace JediForceMod
                         {
                             npc.StrikeNPC(npc.CalculateHitInfo(50 + (JumpLevel * 10), 0));
                             npc.AddBuff(Terraria.ID.BuffID.Confused, 120);
+                            if (npc.life <= 0) AddExperience(30); // Бонус за убийство приземлением
                         }
                     }
                 }
@@ -517,6 +519,9 @@ namespace JediForceMod
             // --- ЛОГИКА ИСЦЕЛЕНИЯ ---
             if (HealActive)
             {
+                ForceAnimationTimer = 2;
+                ForceAnimationStyle = 1;
+
                 // --- ВИЗУАЛЬНАЯ АУРА (зависит от уровня) ---
                 if (HealLevel == 1)
                 {
@@ -580,8 +585,17 @@ namespace JediForceMod
                         if (Player.statMana >= cost)
                         {
                             Player.statMana -= cost;
+                            Player.manaRegenDelay = 60;
                             Player.statLife += healAmount;
                             Player.HealEffect(healAmount);
+
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4, Player.Center);
+                            AddSkillXP(3, 10);
+
+                            if (SkillLevels[3] >= 15)
+                            {
+                                Player.AddBuff(Terraria.ID.BuffID.RapidHealing, 600);
+                            }
 
                             // Визуальный эффект (зеленые частицы)
                             for (int i = 0; i < 15; i++)
@@ -611,6 +625,77 @@ namespace JediForceMod
             }
 
             _wasProtectionActive = isProtectionActive;
+
+            // --- УПРАВЛЕНИЕ БРОСКОМ МЕЧА (Мастерство Ур 15+) ---
+            int saberProjIndex = GetActiveSaberThrowProjectileIndex();
+            if (saberProjIndex != -1)
+            {
+                Projectile proj = Main.projectile[saberProjIndex];
+                
+                // Управление доступно только владельцу персонажа
+                if (Player.whoAmI == Main.myPlayer)
+                {
+                    // Если навык легендарный и кнопка удерживается
+                    if (SkillLevels[9] >= 15 && ForceKeybinds.ForceSaberThrow.Current)
+                    {
+                        bool canControl = true;
+                        int manaCost = 10; // Базовая стоимость удержания в секунду
+
+                        // Проверяем тип меча для скидки
+                        var saberProj = proj.ModProjectile as Content.Projectiles.SaberThrowProjectile;
+                        if (saberProj != null)
+                        {
+                            Item checkItem = new Item();
+                            checkItem.SetDefaults(saberProj.thrownItemType);
+                            if (IsLightsaber(checkItem)) manaCost /= 2;
+                        }
+
+                        // Списание маны раз в секунду
+                        if (Main.GameUpdateCount % 60 == 0)
+                        {
+                            if (Player.statMana >= manaCost)
+                            {
+                                Player.statMana -= manaCost;
+                                Player.manaRegenDelay = 60;
+                            }
+                            else
+                            {
+                                canControl = false;
+                            }
+                        }
+
+                        if (Player.statMana <= 0) canControl = false;
+
+                        if (canControl)
+                        {
+                            // Направляем меч к курсору
+                            Vector2 target = Main.MouseWorld;
+                            Vector2 dir = target - proj.Center;
+                            float dist = dir.Length();
+
+                            float speed = 16f;
+                            float inertia = 10f;
+
+                            if (dist < 100f)
+                            {
+                                speed = 8f; // Замедляемся возле курсора, чтобы он "пилил" врагов
+                                inertia = 4f;
+                            }
+
+                            if (dist > 10f)
+                            {
+                                dir.Normalize();
+                                proj.velocity = (proj.velocity * (inertia - 1) + dir * speed) / inertia;
+                            }
+
+                            // Сбрасываем таймер возврата (ai[0]), чтобы меч не улетел назад
+                            proj.ai[0] = 15f; 
+                            proj.timeLeft = 300; // Продлеваем время жизни
+                            if (Main.GameUpdateCount % 10 == 0) proj.netUpdate = true;
+                        }
+                    }
+                }
+            }
 
             // --- БЛОКИРОВАНИЕ СНАРЯДОВ СВЕТОВЫМ МЕЧОМ ---
             if (Player.itemAnimation > 0 && !Player.ItemAnimationJustStarted)
@@ -682,7 +767,7 @@ namespace JediForceMod
             }
             else
             {
-                ChokeTargetIndex = -1; // Если кнопку отпустили, сбрасываем цель
+                ChokeTargets.Clear(); // Если кнопку отпустили, сбрасываем цели
             }
         }
 
@@ -712,13 +797,126 @@ namespace JediForceMod
             HealActive = false;
             HealTimer = 0;
             
-            // Накладываем дебафф на 1.5 минуты (90 секунд * 60 тиков = 5400)
-            Player.AddBuff(Terraria.ID.BuffID.PotionSickness, 5400);
+            // Накладываем дебафф (время берется из конфига в секундах * 60 тиков)
+            int cooldown = ModContent.GetInstance<ForceConfig>().HealCooldown * 60;
+            Player.AddBuff(Terraria.ID.BuffID.PotionSickness, cooldown);
         }
 
         public override void OnEnterWorld()
         {
             // ForcePoints = 5; // Убираем халявные очки, пусть игрок качается с нуля
+        }
+
+        public void ReceiveHolocronXP(int amount)
+        {
+            ForceExperience += amount;
+
+            // Цикл для обработки нескольких повышений уровня подряд
+            while (ForceExperience >= ForceExperienceMax)
+            {
+                ForceExperience -= ForceExperienceMax;
+                ForcePoints++;
+                ForceExperienceMax = (int)(ForceExperienceMax * 1.25f);
+
+                // Эффекты
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                CombatText.NewText(Player.getRect(), Color.Red, "DARK KNOWLEDGE!", true);
+
+                Player.statMana = Player.statManaMax2;
+                Player.ManaEffect(Player.statManaMax2);
+
+                // Визуальный эффект (Красный для ситхов)
+                for (int k = 0; k < 30; k++)
+                {
+                    Vector2 speed = Main.rand.NextVector2Circular(1f, 1f) * 4f;
+                    Dust d = Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.RedTorch, speed, 0, default, 2.0f);
+                    d.noGravity = true;
+                }
+            }
+        }
+
+        public void ReceiveSithHolocronXP(int amount)
+        {
+            // Индексы темных способностей: 4 (Молния), 6 (Удушение)
+            List<int> darkSkills = new List<int> { 4, 6 };
+            List<int> validSkills = new List<int>();
+
+            foreach (int id in darkSkills)
+            {
+                // Проверяем, изучена ли способность (уровень > 0) и не достигла ли максимума (15)
+                if (SkillLevels[id] > 0 && SkillLevels[id] < 15)
+                {
+                    validSkills.Add(id);
+                }
+            }
+
+            if (validSkills.Count > 0)
+            {
+                int xpPerSkill = amount / validSkills.Count;
+                foreach (int id in validSkills)
+                {
+                    AddSkillXP(id, xpPerSkill);
+                }
+
+                // Эффекты
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                CombatText.NewText(Player.getRect(), Color.Red, "DARK MASTERY!", true);
+
+                // Визуальный эффект (Красный для ситхов)
+                for (int k = 0; k < 30; k++)
+                {
+                    Vector2 speed = Main.rand.NextVector2Circular(1f, 1f) * 4f;
+                    Dust d = Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.RedTorch, speed, 0, default, 2.0f);
+                    d.noGravity = true;
+                }
+            }
+            else
+            {
+                // Если нет открытых темных сил, даем обычный опыт, чтобы предмет не пропал зря
+                ReceiveHolocronXP(amount);
+            }
+        }
+
+        public void ReceiveJediHolocronXP(int amount)
+        {
+            // Индексы светлых способностей: 3 (Лечение), 7 (Обман Разума), 8 (Защита)
+            List<int> lightSkills = new List<int> { 3, 7, 8 };
+            List<int> validSkills = new List<int>();
+
+            foreach (int id in lightSkills)
+            {
+                // Проверяем, изучена ли способность (уровень > 0) и не достигла ли максимума (15)
+                if (SkillLevels[id] > 0 && SkillLevels[id] < 15)
+                {
+                    validSkills.Add(id);
+                }
+            }
+
+            if (validSkills.Count > 0)
+            {
+                int xpPerSkill = amount / validSkills.Count;
+                foreach (int id in validSkills)
+                {
+                    AddSkillXP(id, xpPerSkill);
+                }
+
+                // Эффекты
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                CombatText.NewText(Player.getRect(), Color.Cyan, "LIGHT MASTERY!", true);
+
+                // Визуальный эффект (Синий для джедаев)
+                for (int k = 0; k < 30; k++)
+                {
+                    Vector2 speed = Main.rand.NextVector2Circular(1f, 1f) * 4f;
+                    Dust d = Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.BlueCrystalShard, speed, 0, default, 2.0f);
+                    d.noGravity = true;
+                }
+            }
+            else
+            {
+                // Если нет открытых светлых сил, даем обычный опыт
+                ReceiveHolocronXP(amount);
+            }
         }
 
         public void AddExperience(int damageDone)
@@ -946,6 +1144,7 @@ namespace JediForceMod
                         AddExperience(1);
                         
                         AddSkillXP(0, 3); // 0 - индекс Толчка. Снизили с 5 до 3.
+                        if (npc.life <= 0) AddExperience(30); // Бонус за убийство толчком
 
                         if (PushLevel >= 3)
                         {
@@ -1002,41 +1201,7 @@ namespace JediForceMod
                 return;
             }
 
-            if (Player.HasBuff(Terraria.ID.BuffID.PotionSickness)) return;
-
-            var config = ModContent.GetInstance<ForceConfig>();
-            if (Player.statMana < config.HealManaCost) return;
-
-            Player.statMana -= config.HealManaCost;
-            Player.manaRegenDelay = 60;
-
-            ForceAnimationTimer = 30;
-            ForceAnimationStyle = 1;
-
-            int healAmount = config.HealAmount * HealLevel;
-            Player.statLife += healAmount;
-            Player.HealEffect(healAmount);
-
-            int cooldown = 1800;
-            if (HealLevel >= 3) cooldown = 1200;
-            Player.AddBuff(Terraria.ID.BuffID.PotionSickness, cooldown);
-
-            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4, Player.Center);
-
-            AddSkillXP(3, 10); // 3 - индекс Лечения. Снизили с 15 до 10.
-
-            // ЛЕГЕНДАРНЫЙ ЭФФЕКТ (Ур 15+): Ревитализация
-            if (SkillLevels[3] >= 15)
-            {
-                Player.AddBuff(Terraria.ID.BuffID.RapidHealing, 600); // Быстрая регенерация на 10 сек
-            }
-
-            for (int i = 0; i < 30; i++)
-            {
-                Vector2 speed = Main.rand.NextVector2Circular(1f, 1f);
-                Dust d = Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GreenFairy, speed * 4, 100, default, 1.5f);
-                d.noGravity = true;
-            }
+            ToggleHeal();
         }
 
         public void UseLightning(Vector2 direction)
@@ -1129,6 +1294,7 @@ namespace JediForceMod
                     AddExperience(hitDmg);
 
                     AddSkillXP(4, 1); // 4 - индекс Молнии. Снизили с 2 до 1 за удар.
+                    if (npc.life <= 0) AddExperience(30); // Бонус за убийство молнией
 
                     if (LightningLevel >= 3) npc.AddBuff(Terraria.ID.BuffID.Electrified, 180);
 
@@ -1179,7 +1345,12 @@ namespace JediForceMod
                 DrawLightning(currentSourcePos, endPos, LightningLevel);
                 
                 // Искры в месте удара
-                Dust.NewDust(endPos, 10, 10, Terraria.ID.DustID.Electric);
+
+                int impactDust = Terraria.ID.DustID.Electric;
+                if (LightningLevel == 2) impactDust = Terraria.ID.DustID.ShadowbeamStaff;
+                else if (LightningLevel >= 3) impactDust = Terraria.ID.DustID.LifeDrain;
+
+                Dust.NewDust(endPos, 10, 10, impactDust);
             }
         }
 
@@ -1345,31 +1516,67 @@ namespace JediForceMod
             int damage = config.ChokeDamage * ChokeLevel;
             int manaCost = config.ChokeManaCost;
 
-            if (ChokeTargetIndex == -1 || !Main.npc[ChokeTargetIndex].active || Main.npc[ChokeTargetIndex].Distance(Player.Center) > range)
+            // Определяем максимальное количество целей
+            int maxTargets = 1;
+            // ЛЕГЕНДАРНЫЙ БОНУС (Ур 15+): Дополнительные цели за каждый уровень сверх 14
+            if (SkillLevels[6] >= 15)
             {
-                ChokeTargetIndex = -1;
-                int bestTarget = -1;
-                float bestDist = 200f;
-
-                for (int i = 0; i < Main.maxNPCs; i++)
-                {
-                    NPC npc = Main.npc[i];
-                    if (npc.active && !npc.friendly && !npc.dontTakeDamage)
-                    {
-                        float d = Vector2.Distance(Main.MouseWorld, npc.Center);
-                        if (d < bestDist && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
-                        {
-                            bestDist = d;
-                            bestTarget = i;
-                        }
-                    }
-                }
-                ChokeTargetIndex = bestTarget;
+                maxTargets += (SkillLevels[6] - 14);
             }
 
-            if (ChokeTargetIndex != -1)
+            // 1. Очистка списка от невалидных целей (мертвые, далеко, неактивные)
+            for (int i = ChokeTargets.Count - 1; i >= 0; i--)
             {
-                NPC target = Main.npc[ChokeTargetIndex];
+                int idx = ChokeTargets[i];
+                if (!Main.npc[idx].active || Main.npc[idx].Distance(Player.Center) > range)
+                {
+                    ChokeTargets.RemoveAt(i);
+                }
+            }
+
+            // 2. Поиск новых целей, если есть место
+            if (ChokeTargets.Count < maxTargets)
+            {
+                // Пытаемся найти цели столько раз, сколько не хватает до максимума
+                int needed = maxTargets - ChokeTargets.Count;
+                for (int n = 0; n < needed; n++)
+                {
+                    int bestTarget = -1;
+                    float bestDist = 200f; // Радиус захвата от курсора мыши
+
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        if (ChokeTargets.Contains(i)) continue; // Уже душим этого
+
+                        NPC npc = Main.npc[i];
+                        if (npc.active && !npc.friendly && !npc.dontTakeDamage)
+                        {
+                            float d = Vector2.Distance(Main.MouseWorld, npc.Center);
+                            if (d < bestDist && Collision.CanHitLine(Player.Center, 0, 0, npc.Center, 0, 0))
+                            {
+                                bestDist = d;
+                                bestTarget = i;
+                            }
+                        }
+                    }
+
+                    if (bestTarget != -1)
+                    {
+                        ChokeTargets.Add(bestTarget);
+                    }
+                    else
+                    {
+                        break; // Больше нет подходящих целей рядом с курсором
+                    }
+                }
+            }
+
+            // 3. Применение эффекта ко всем целям
+            for (int i = ChokeTargets.Count - 1; i >= 0; i--)
+            {
+                int targetIndex = ChokeTargets[i];
+                NPC target = Main.npc[targetIndex];
+
                 if (Player.statMana >= manaCost)
                 {
                     Player.statMana -= manaCost;
@@ -1382,6 +1589,30 @@ namespace JediForceMod
                         target.StrikeNPC(target.CalculateHitInfo(damage, 0, false, 0));
                         AddExperience(damage);
                         AddSkillXP(6, 1); // 6 - индекс Удушения. Опыт за тик урона.
+                        if (target.life <= 0) 
+                        {
+                            AddExperience(30); // Бонус за убийство удушением
+
+                            // --- ЭФФЕКТ ПОГЛОЩЕНИЯ (Мастерство 9+) ---
+                            if (SkillLevels[6] >= 9)
+                            {
+                                int manaRestore = 15;
+                                int healthRestore = 5;
+                                Player.statMana += manaRestore;
+                                Player.ManaEffect(manaRestore);
+                                Player.statLife += healthRestore;
+                                Player.HealEffect(healthRestore);
+
+                                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center); // Звук поглощения
+                                for (int h = 0; h < 20; h++)
+                                {
+                                    Vector2 velocity = Player.Center - target.Center;
+                                    velocity.Normalize();
+                                    velocity *= Main.rand.NextFloat(5f, 10f); // Частицы летят к игроку
+                                    Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 1.5f).noGravity = true;
+                                }
+                            }
+                        }
 
                         if (Main.GameUpdateCount % 30 == 0) Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item15, target.Center);
                         if (ChokeLevel >= 3) target.AddBuff(Terraria.ID.BuffID.Suffocation, 120);
@@ -1394,20 +1625,50 @@ namespace JediForceMod
                         {
                             target.StrikeNPC(target.CalculateHitInfo(target.life + 999, 0, true)); // Мгновенная смерть (крит)
                             CombatText.NewText(target.getRect(), Color.Red, "EXECUTED!", true);
+                            AddExperience(50); // Бонус за казнь
+
+                            // Эффект поглощения при казни
+                            if (SkillLevels[6] >= 9)
+                            {
+                                int manaRestore = 30; // Удвоенная награда за казнь
+                                int healthRestore = 10;
+                                Player.statMana += manaRestore;
+                                Player.ManaEffect(manaRestore);
+                                Player.statLife += healthRestore;
+                                Player.HealEffect(healthRestore);
+
+                                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item103, Player.Center);
+                                for (int h = 0; h < 30; h++)
+                                {
+                                    Vector2 velocity = Player.Center - target.Center;
+                                    velocity.Normalize();
+                                    velocity *= Main.rand.NextFloat(8f, 15f);
+                                    Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.SpectreStaff, velocity, 100, default, 2.0f).noGravity = true;
+                                }
+                            }
                         }
                     }
 
-                    if (Main.rand.NextBool(2))
+                    // Визуальная линия связи между игроком и целью
+                    Vector2 connectionDir = target.Center - Player.Center;
+                    float connectionDist = connectionDir.Length();
+                    connectionDir.Normalize();
+
+                    for (float k = 10; k < connectionDist; k += 10f)
                     {
-                        Vector2 dir = target.Center - Player.Center;
-                        Vector2 dustPos = Player.Center + dir * Main.rand.NextFloat(0.1f, 0.9f);
-                        Dust.NewDustPerfect(dustPos, Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 0.5f).noGravity = true;
+                        if (Main.rand.NextBool(3)) // Мерцающий эффект
+                        {
+                            Vector2 pos = Player.Center + connectionDir * k;
+                            Dust d = Dust.NewDustPerfect(pos, Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 0.6f);
+                            d.noGravity = true;
+                            d.velocity = connectionDir * 5f; // Частицы быстро летят к цели
+                        }
                     }
                     Dust chokeDust = Dust.NewDustDirect(target.Top + new Vector2(-10, 0), 20, 20, Terraria.ID.DustID.RedTorch, 0, 0, 100, default, 1.2f);
                     chokeDust.noGravity = true;
                     chokeDust.velocity *= 0.5f;
 
-                    for (int i = 0; i < 3; i++)
+                    for (int h = 0; h < 3; h++)
                     {
                         Dust d = Dust.NewDustPerfect(target.Center + Main.rand.NextVector2Circular(target.width * 0.5f, target.height * 0.5f), Terraria.ID.DustID.RedTorch, Vector2.Zero, 150, default, 2.0f);
                         d.noGravity = true;
@@ -1416,13 +1677,29 @@ namespace JediForceMod
                 }
                 else
                 {
-                    ChokeTargetIndex = -1;
+                    // Если мана кончилась, перестаем душить эту цель
+                    ChokeTargets.RemoveAt(i);
                 }
             }
         }
 
         private void DrawLightning(Vector2 start, Vector2 end, int level)
         {
+            // Определяем цвета в зависимости от уровня
+            int coreDust = Terraria.ID.DustID.Electric; // Синий (Ур 1)
+            int haloDust = Terraria.ID.DustID.BlueCrystalShard;
+
+            if (level == 2)
+            {
+                coreDust = Terraria.ID.DustID.ShadowbeamStaff; // Фиолетовый (Ур 2)
+                haloDust = Terraria.ID.DustID.GemAmethyst;
+            }
+            else if (level >= 3)
+            {
+                coreDust = Terraria.ID.DustID.LifeDrain; // Красный (Ур 3)
+                haloDust = Terraria.ID.DustID.RedTorch;
+            }
+
             Vector2 direction = end - start;
             float distance = direction.Length();
             direction.Normalize();
@@ -1465,14 +1742,14 @@ namespace JediForceMod
                     Vector2 dustPos = segmentStart + segDir * k;
                     
                     // Основная молния (яркая, мелкая)
-                    Dust d = Dust.NewDustPerfect(dustPos, Terraria.ID.DustID.Electric, Vector2.Zero, 50, default, 0.5f);
+                    Dust d = Dust.NewDustPerfect(dustPos, coreDust, Vector2.Zero, 50, default, 0.5f);
                     d.noGravity = true;
                     d.velocity = Vector2.Zero;
 
-                    // Ореол (покрупнее, реже, синий)
+                    // Ореол (покрупнее, реже)
                     if (Main.rand.NextBool(5))
                     {
-                        Dust d2 = Dust.NewDustPerfect(dustPos, Terraria.ID.DustID.BlueCrystalShard, Vector2.Zero, 100, default, 1.0f);
+                        Dust d2 = Dust.NewDustPerfect(dustPos, haloDust, Vector2.Zero, 100, default, 1.0f);
                         d2.noGravity = true;
                         d2.velocity = Main.rand.NextVector2Circular(1f, 1f); // Легкое движение
                     }
@@ -1499,7 +1776,7 @@ namespace JediForceMod
                     // Рисуем короткую ветку
                     for (float b = 0; b < branchLen; b += 4f)
                     {
-                        Dust d = Dust.NewDustPerfect(branchStart + branchNorm * b, Terraria.ID.DustID.Electric, Vector2.Zero, 150, default, 0.4f);
+                        Dust d = Dust.NewDustPerfect(branchStart + branchNorm * b, coreDust, Vector2.Zero, 150, default, 0.4f);
                         d.noGravity = true;
                     }
                 }

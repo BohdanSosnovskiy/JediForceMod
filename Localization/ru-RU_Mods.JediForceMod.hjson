@@ -43,6 +43,16 @@ Items: {
 		// DisplayName: Force Saber Throw
 		// Tooltip: ""
 	}
+
+	JediHolocron: {
+		// DisplayName: Jedi Holocron
+		// Tooltip: ""
+	}
+
+	SithHolocron: {
+		// DisplayName: Sith Holocron
+		// Tooltip: ""
+	}
 }
 
 Configs: {
@@ -143,6 +153,11 @@ Configs: {
 
 		SaberThrowDamage: {
 			// Label: Базовый урон Броска Меча
+			// Tooltip: ""
+		}
+
+		HealCooldown: {
+			// Label: Перезарядка лечения (сек)
 			// Tooltip: ""
 		}
 	}

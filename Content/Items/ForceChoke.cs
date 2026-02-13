@@ -32,7 +32,7 @@ namespace JediForceMod.Content.Items
             else
             {
                 // Если кнопку отпустили, сбрасываем цель
-                player.GetModPlayer<ForcePlayer>().ChokeTargetIndex = -1;
+                player.GetModPlayer<ForcePlayer>().ChokeTargets.Clear();
             }
         }
     }

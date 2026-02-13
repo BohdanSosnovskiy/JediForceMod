@@ -5,6 +5,7 @@ using System.IO;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.GameContent;
+using Terraria.Audio;
 
 namespace JediForceMod.Content.Projectiles
 {
@@ -63,6 +64,15 @@ namespace JediForceMod.Content.Projectiles
 
             // Вращение спрайта
             Projectile.rotation += 0.4f * Projectile.direction;
+
+            // --- ЗВУК ГУДЕНИЯ ---
+            // Используем soundDelay для цикличного воспроизведения звука
+            if (Projectile.soundDelay == 0)
+            {
+                // Item15 - звук взмаха светового меча. Делаем его тише и чуть ниже по тону для эффекта гудения.
+                SoundEngine.PlaySound(SoundID.Item15 with { Volume = 0.5f, Pitch = -0.2f, MaxInstances = 3 }, Projectile.position);
+                Projectile.soundDelay = 15; // Каждые 15 тиков (4 раза в секунду)
+            }
 
             // Визуальные эффекты (след)
             if (Main.rand.NextBool(2))
@@ -127,6 +137,7 @@ namespace JediForceMod.Content.Projectiles
             {
                 var modPlayer = Main.LocalPlayer.GetModPlayer<ForcePlayer>();
                 modPlayer.AddSkillXP(9, 2); // 9 - индекс Броска Меча
+                if (target.life <= 0) modPlayer.AddExperience(30); // Бонус за убийство броском
             }
         }
     }

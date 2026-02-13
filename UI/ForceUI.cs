@@ -379,7 +379,7 @@ namespace JediForceMod.UI
                 "МАСТЕР: Меч самонаводится на врагов при возвращении."
             };
             // Используем иконку Enchanted Boomerang как заглушку
-            Asset<Texture2D> throwAsset = ModContent.Request<Texture2D>("Terraria/Images/Item_" + ItemID.EnchantedBoomerang, AssetRequestMode.ImmediateLoad);
+            Asset<Texture2D> throwAsset = ModContent.Request<Texture2D>("JediForceMod/Assets/UI/ForceSaberthrow", AssetRequestMode.ImmediateLoad);
             ForceButton throwButton = new ForceButton(throwAsset.Value, 13, "Бросок Меча", throwDescs);
             throwButton.Left.Set(80, 0f); // Второй ряд
             throwButton.Top.Set(150, 0f);

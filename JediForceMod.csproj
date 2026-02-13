@@ -10,6 +10,7 @@
 	<ItemGroup>
 	  <AdditionalFiles Remove="Assets\UI\BarFill.png" />
 	  <AdditionalFiles Remove="Assets\UI\Choke.png" />
+	  <AdditionalFiles Remove="Assets\UI\ForceSaberthrow.png" />
 	  <AdditionalFiles Remove="Assets\UI\Frame.png" />
 	  <AdditionalFiles Remove="Assets\UI\Frame_use.png" />
 	  <AdditionalFiles Remove="Assets\UI\Heal.png" />
@@ -24,6 +25,7 @@
 	<ItemGroup>
 	  <Content Include="Assets\UI\BarFill.png" />
 	  <Content Include="Assets\UI\Choke.png" />
+	  <Content Include="Assets\UI\ForceSaberthrow.png" />
 	  <Content Include="Assets\UI\Frame.png" />
 	  <Content Include="Assets\UI\Frame_use.png" />
 	  <Content Include="Assets\UI\Heal.png" />

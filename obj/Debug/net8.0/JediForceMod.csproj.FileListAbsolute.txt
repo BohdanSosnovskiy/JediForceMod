@@ -10,3 +10,4 @@ C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSourc
 C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\refint\JediForceMod.dll
 C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.pdb
 C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\ref\JediForceMod.dll
+C:\Users\Alex_\OneDrive\Документы\My Games\Terraria\tModLoader\ModSources\JediForceMod\obj\Debug\net8.0\JediForceMod.sourcelink.json

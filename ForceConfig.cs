@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿﻿﻿﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
 namespace JediForceMod
@@ -47,6 +47,11 @@ namespace JediForceMod
         [Range(5, 100)]
         [Label("Базовое лечение (HP)")]
         public int HealAmount;
+
+        [DefaultValue(90)]
+        [Range(10, 300)]
+        [Label("Перезарядка лечения (сек)")]
+        public int HealCooldown;
 
         [Header("ForceLightningSettings")]
         [DefaultValue(40)] // Было 30

@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\content\\items\\forcehealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|solutionrelative:content\\items\\forcehealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\content\\buffs\\forceprotectioncooldown.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|solutionrelative:content\\buffs\\forceprotectioncooldown.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\content\\items\\sithholocron.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|solutionrelative:content\\items\\sithholocron.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\forceplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|solutionrelative:forceplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\content\\items\\forcehealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|solutionrelative:content\\items\\forcehealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{96699AB5-ABF3-2E2C-A465-7F7EBD62D75E}|JediForceMod.csproj|c:\\users\\alex_\\onedrive\\\u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\my games\\terraria\\tmodloader\\modsources\\jediforcemod\\ui\\forceui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -34,11 +42,41 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "SithHolocron.cs",
+              "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Items\\SithHolocron.cs",
+              "RelativeDocumentMoniker": "Content\\Items\\SithHolocron.cs",
+              "ToolTip": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Items\\SithHolocron.cs",
+              "RelativeToolTip": "Content\\Items\\SithHolocron.cs",
+              "ViewState": "AgIAADgAAAAAAAAAAAAwwE8AAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-11T06:18:16.889Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ForcePlayer.cs",
+              "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\ForcePlayer.cs",
+              "RelativeDocumentMoniker": "ForcePlayer.cs",
+              "ToolTip": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\ForcePlayer.cs",
+              "RelativeToolTip": "ForcePlayer.cs",
+              "ViewState": "AgIAAPYFAAAAAAAAAAAIwP4FAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:28:19.042Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "ForceProtectionCooldown.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Buffs\\ForceProtectionCooldown.cs",
               "RelativeDocumentMoniker": "Content\\Buffs\\ForceProtectionCooldown.cs",
@@ -51,7 +89,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "ForceHealth.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Items\\ForceHealth.cs",
               "RelativeDocumentMoniker": "Content\\Items\\ForceHealth.cs",
@@ -59,12 +97,11 @@
               "RelativeToolTip": "Content\\Items\\ForceHealth.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAABwAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-09T00:30:54.888Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-09T00:30:54.888Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "ForceButton.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\UI\\ForceButton.cs",
               "RelativeDocumentMoniker": "UI\\ForceButton.cs",
@@ -72,12 +109,11 @@
               "RelativeToolTip": "UI\\ForceButton.cs",
               "ViewState": "AgIAABsAAAAAAAAAAAAgwEYAAABaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-08T23:26:18.669Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-08T23:26:18.669Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "ForceUI.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\UI\\ForceUI.cs",
               "RelativeDocumentMoniker": "UI\\ForceUI.cs",
@@ -85,12 +121,11 @@
               "RelativeToolTip": "UI\\ForceUI.cs",
               "ViewState": "AgIAAC4BAAAAAAAAAAAgwM8AAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-08T23:23:35.051Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-08T23:23:35.051Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "ForceSpeed.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Items\\ForceSpeed.cs",
               "RelativeDocumentMoniker": "Content\\Items\\ForceSpeed.cs",
@@ -98,16 +133,11 @@
               "RelativeToolTip": "Content\\Items\\ForceSpeed.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAA1wB8AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-08T23:22:07.002Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+              "WhenOpened": "2026-02-08T23:22:07.002Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ForceSight.cs",
               "DocumentMoniker": "C:\\Users\\Alex_\\OneDrive\\\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B\\My Games\\Terraria\\tModLoader\\ModSources\\JediForceMod\\Content\\Items\\ForceSight.cs",
               "RelativeDocumentMoniker": "Content\\Items\\ForceSight.cs",
@@ -115,8 +145,7 @@
               "RelativeToolTip": "Content\\Items\\ForceSight.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAABkAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-08T23:20:36.96Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-08T23:20:36.96Z"
             }
           ]
         }

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JediForceMod")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a36d603b32e906e37bb5b21067225477079e431f")]
 [assembly: System.Reflection.AssemblyProductAttribute("JediForceMod")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JediForceMod")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

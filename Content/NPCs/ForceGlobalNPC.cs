@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using JediForceMod;
+using JediForceMod.Content.Items;
 
 namespace JediForceMod.Content.NPCs
 {
@@ -156,6 +157,7 @@ namespace JediForceMod.Content.NPCs
                     {
                         Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddExperience(forcePushDamage + speedDamage);
                         Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddSkillXP(0, 5); // 0 - Толчок. Снизили бонус с 10 до 5.
+                        if (npc.life <= 0) Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddExperience(30); // Бонус за убийство об стену
                     }
 
                     // Визуальные эффекты удара (звук и пыль)
@@ -251,6 +253,7 @@ namespace JediForceMod.Content.NPCs
                         {
                             Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddExperience(damage);
                             Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddSkillXP(7, 5); // 7 - Обман. Бонус за атаку марионетки.
+                            if (targetEnemy.life <= 0) Main.LocalPlayer.GetModPlayer<ForcePlayer>().AddExperience(30); // Бонус за убийство марионеткой
                         }
 
                         mindTrickAttackCooldown = 30; // Кулдаун 0.5 сек (чтобы не убивали мгновенно)
@@ -258,6 +261,66 @@ namespace JediForceMod.Content.NPCs
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCHit1, targetEnemy.position);
                     }
                 }
+            }
+        }
+
+        public override void OnKill(NPC npc)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+
+            // 1. Определяем количество опыта и шанс в зависимости от этапа игры
+            int xpAmount = 500;
+            int chanceDenominator = 100; // Шанс 1/100 (1%)
+
+            if (Main.hardMode)
+            {
+                xpAmount = 2500;
+                chanceDenominator = 75; // Шанс ~1.3%
+            }
+
+            if (NPC.downedPlantBoss)
+            {
+                xpAmount = 10000;
+                chanceDenominator = 50; // Шанс 2%
+            }
+
+            // Для боссов шанс 100%
+            if (npc.boss) chanceDenominator = 1;
+
+            // 2. Определяем сторону (Темная или Светлая)
+            // Используем ближайшего игрока для определения биома, так как у NPC нет свойств Zone...
+            Player player = Main.player[Player.FindClosest(npc.position, npc.width, npc.height)];
+            
+            // ТЕМНАЯ СТОРОНА (Sith Holocron)
+            // Искажение, Багрянец, Данж, Ад, Солнечное Затмение
+            bool isDark = player.ZoneCorrupt || player.ZoneCrimson || player.ZoneDungeon || player.ZoneUnderworldHeight || Main.eclipse;
+            
+            // Дополнительные боссы Темной стороны
+            if (npc.type == NPCID.EyeofCthulhu || npc.type == NPCID.SkeletronHead || npc.type == NPCID.WallofFlesh || 
+                npc.type == NPCID.TheDestroyer || npc.type == NPCID.Retinazer || npc.type == NPCID.Spazmatism || 
+                npc.type == NPCID.SkeletronPrime || npc.type == NPCID.Plantera || npc.type == NPCID.Golem || 
+                npc.type == NPCID.MoonLordCore || npc.type == NPCID.KingSlime)
+            {
+                isDark = true;
+            }
+
+            if (isDark && Main.rand.NextBool(chanceDenominator))
+            {
+                int itemIndex = Item.NewItem(npc.GetSource_Loot(), npc.getRect(), ModContent.ItemType<SithHolocron>());
+                if (Main.item[itemIndex].ModItem is SithHolocron holocron) holocron.xpAmount = xpAmount;
+                return; // Чтобы не выпало сразу два
+            }
+
+            // СВЕТЛАЯ СТОРОНА (Jedi Holocron)
+            // Освящение, Космос, Метеор
+            bool isLight = player.ZoneHallow || player.ZoneSkyHeight || player.ZoneMeteor;
+
+            if (npc.type == NPCID.HallowBoss || npc.type == NPCID.QueenBee || npc.type == NPCID.CultistBoss) isLight = true;
+
+            if (isLight && Main.rand.NextBool(chanceDenominator))
+            {
+                int itemIndex = Item.NewItem(npc.GetSource_Loot(), npc.getRect(), ModContent.ItemType<JediHolocron>());
+                if (Main.item[itemIndex].ModItem is JediHolocron holocron) holocron.xpAmount = xpAmount;
             }
         }
     }
